@@ -63,6 +63,21 @@ describe('OctoFit API contract', () => {
     expect(listed.body.teams[0]).toMatchObject({ name: 'Octocats', mascot: 'Mona' });
     expect(listed.body.teams[0].members.map((id: string) => id.toString())).toContain(member._id.toString());
   });
+  it('keeps a member linked to only the newly assigned team', async () => {
+    const previousTeam = await Team.create({ name: 'Previous team', mascot: 'Mona', members: [] });
+    const member = await User.create({ name: 'Mona', email: 'mona@example.com', fitnessGoal: 'endurance', team: previousTeam._id });
+    await Team.updateOne({ _id: previousTeam._id }, { $addToSet: { members: member._id } });
+
+    const response = await request(app).post('/api/teams').send({ name: 'Octocats', mascot: 'Mona', members: [member._id.toString()] });
+
+    expect(response.status).toBe(201);
+    const updatedMember = await User.findById(member._id);
+    const oldTeam = await Team.findById(previousTeam._id);
+    const newTeam = await Team.findById(response.body.team._id);
+    expect(updatedMember?.team?.toString()).toBe(response.body.team._id);
+    expect(oldTeam?.members.map((id) => id.toString())).not.toContain(member._id.toString());
+    expect(newTeam?.members.map((id) => id.toString())).toContain(member._id.toString());
+  });
   it('orders leaderboard entries by total points', async () => {
     const mona = await createUserAndTeam('Mona', 'mona@example.com', 'Mona', 'Octocats');
     const hubot = await createUserAndTeam('Hubot', 'hubot@example.com', 'Hubot', 'Robocats');

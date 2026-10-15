@@ -1,4 +1,18 @@
-import { CapabilityCard } from './CapabilityCard.js';
+import { useApiResource } from '../api/useApiResource.js';
+
+type Team = { _id?: string; name: string; mascot: string; members: string[] };
+
 export default function Teams() {
-  return <CapabilityCard title="Teams" description="Manage teams and members." />;
+  const state = useApiResource<{ teams: Team[] }>('/api/teams');
+  return <section className="card h-100"><div className="card-body">
+    <h2 className="h4">Teams</h2>
+    <p>Manage teams and members.</p>
+    {state.status === 'loading' && <p role="status">Loading teams...</p>}
+    {state.status === 'error' && <p role="alert">Unable to load teams: {state.message}</p>}
+    {state.status === 'success' && (state.data.teams.length === 0
+      ? <p>No teams yet.</p>
+      : <ul>{state.data.teams.map((team, index) => <li key={team._id ?? `${team.name}-${index}`}>
+        {team.name} ({team.mascot}) · {team.members.length} members
+      </li>)}</ul>)}
+  </div></section>;
 }
