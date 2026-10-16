@@ -1,9 +1,10 @@
+import { getJson } from '../api/client.js';
 import { useApiResource } from '../api/useApiResource.js';
 
 type Workout = { _id?: string; title: string; focus: string; minutes: number; difficulty: string; reason: string };
 
 export default function Workouts() {
-  const state = useApiResource<{ suggestions: Workout[] }>('/api/workouts/suggestions/mona%40example.com');
+  const state = useApiResource<{ suggestions: Workout[] }>('/api/workouts/suggestions/mona%40example.com', getJson<{ suggestions: Workout[] }>);
   return <section className="card h-100"><div className="card-body">
     <h2 className="h4">Workout suggestions</h2>
     <p>Recommend workouts from activity patterns.</p>

@@ -1,9 +1,10 @@
+import { getJson } from '../api/client.js';
 import { useApiResource } from '../api/useApiResource.js';
 
 type Team = { _id?: string; name: string; mascot: string; members: string[] };
 
 export default function Teams() {
-  const state = useApiResource<{ teams: Team[] }>('/api/teams');
+  const state = useApiResource<{ teams: Team[] }>('/api/teams', getJson<{ teams: Team[] }>);
   return <section className="card h-100"><div className="card-body">
     <h2 className="h4">Teams</h2>
     <p>Manage teams and members.</p>
